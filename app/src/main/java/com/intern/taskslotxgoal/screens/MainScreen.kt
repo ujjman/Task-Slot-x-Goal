@@ -40,6 +40,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import com.intern.taskslotxgoal.R
+import com.intern.taskslotxgoal.Screen
 import com.intern.taskslotxgoal.ui.theme.DisabledButton
 import com.intern.taskslotxgoal.ui.theme.TimerProgress
 import com.intern.taskslotxgoal.viewmodels.MainViewModel
@@ -80,79 +81,69 @@ fun MainScreen(
         listOf("Study Physics", "Study Chemistry", " Study Maths", "Study Biology", "Study English")
     var mExpanded by remember { mutableStateOf(false) }
 
-    mainViewModel.firstText.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.firstText.observe(navController.context as LifecycleOwner) {
         if (it.isNotEmpty()) {
             firstText = it
         }
 
     }
-    mainViewModel.firstTextContinued.observe(navController.context as LifecycleOwner)
-    {
-
+    mainViewModel.firstTextContinued.observe(navController.context as LifecycleOwner) {
         firstTextTime = it
-
-
     }
-    mainViewModel.secondText.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.secondText.observe(navController.context as LifecycleOwner) {
         if (it.isNotEmpty()) {
             secondText = it
         }
     }
-    mainViewModel.thirdText.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.thirdText.observe(navController.context as LifecycleOwner) {
         if (it.isNotEmpty()) {
             thirdText = it
         }
     }
-    mainViewModel.showGrantOverlayDialog.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.showGrantOverlayDialog.observe(navController.context as LifecycleOwner) {
         showTimerDialog = it
     }
-    mainViewModel.progressValue.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.progressValue.observe(navController.context as LifecycleOwner) {
         progressValue = it
     }
-    mainViewModel.buttonColor.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.buttonColor.observe(navController.context as LifecycleOwner) {
         buttonColor = it
     }
-    mainViewModel.buttonText.observe(navController.context as LifecycleOwner)
-    {
+    mainViewModel.buttonText.observe(navController.context as LifecycleOwner) {
         buttonText = it
     }
 
-    val icon = if (mExpanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
+    val icon = if (mExpanded) Icons.Filled.KeyboardArrowUp
+    else Icons.Filled.KeyboardArrowDown
     when (showTimerDialog) {
         true -> {
             SetTime(context = navController.context, mainViewModel = mainViewModel)
         }
         else -> {}
     }
+
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mainViewModel.exit()
+        }
+    }
+
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
+        Scaffold(topBar = {
+            TopAppBar(modifier = Modifier.fillMaxWidth(), backgroundColor = White, title = {
+                Text(
                     modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = White,
-                    title = {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Task Slot x Goal",
-                            style = MaterialTheme.typography.h6,
-                            color = Black,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    text = "Task Slot x Goal",
+                    style = MaterialTheme.typography.h6,
+                    color = Black,
+                    textAlign = TextAlign.Center
                 )
             })
-        {
+        }) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Top,
@@ -177,18 +168,16 @@ fun MainScreen(
                         mainViewModel = mainViewModel
                     )
                     Spacer(modifier = Modifier.padding(top = 20.dp))
-                    Row() {
+                    Row {
                         Text(
-                            text = firstText,
-                            style = MaterialTheme.typography.h1
+                            text = firstText, style = MaterialTheme.typography.h1
                         )
                         Text(text = firstTextTime, style = MaterialTheme.typography.h4)
                     }
 
                     Spacer(modifier = Modifier.padding(top = 50.dp))
                     Text(
-                        text = secondText,
-                        style = MaterialTheme.typography.h2
+                        text = secondText, style = MaterialTheme.typography.h2
                     )
 
                     Spacer(modifier = Modifier.padding(top = 20.dp))
@@ -196,15 +185,12 @@ fun MainScreen(
 
                     when (thirdText) {
                         "" -> {
-                            Box(modifier = Modifier
-                                .clickable {
+                            Box(modifier = Modifier.clickable {
                                     mExpanded = !mExpanded
-                                })
-                            {
+                                }) {
                                 Row {
                                     Text(
-                                        text = mSelectedText,
-                                        style = MaterialTheme.typography.h3
+                                        text = mSelectedText, style = MaterialTheme.typography.h3
                                     )
                                     Spacer(modifier = Modifier.padding(start = 10.dp))
                                     Icon(icon, "contentDescription", tint = Blue)
@@ -231,8 +217,7 @@ fun MainScreen(
                         }
                         else -> {
                             Text(
-                                text = thirdText,
-                                style = MaterialTheme.typography.h3
+                                text = thirdText, style = MaterialTheme.typography.h3
                             )
                         }
                     }
@@ -251,10 +236,9 @@ fun MainScreen(
                 ) {
                     Button(
                         onClick = {
-                            mainViewModel.changeSecondText()
-                            mainViewModel.changeThirdText(mSelectedText)
-                            mainViewModel.setTimer()
-                        }, modifier = Modifier
+                                  handleButtonClick(mainViewModel = mainViewModel, navController = navController, mSelectedText = mSelectedText)
+                        },
+                        modifier = Modifier
                             .fillMaxWidth()
                             .height(80.dp)
                             .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
@@ -330,26 +314,20 @@ fun CircularProgressBar(
 
 
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                mainViewModel.showGrantOverlayDialog.value = true
-            }
-    )
-    {
+    Box(contentAlignment = Alignment.Center, modifier = modifier
+        .fillMaxSize()
+        .clickable(
+            interactionSource = interactionSource, indication = null
+        ) {
+            mainViewModel.showGrantOverlayDialog.value = true
+        }) {
         var radius by remember {
             mutableStateOf(0f)
         }
         Canvas(modifier = modifier.fillMaxSize()) {
 
             val canvasSize = size.minDimension
-            radius =
-                canvasSize / 2 - maxOf(backgroundProgressBarWidth, progressBarWidth).toPx() / 2
+            radius = canvasSize / 2 - maxOf(backgroundProgressBarWidth, progressBarWidth).toPx() / 2
             drawCircle(
                 color = backgroundProgressBarColor,
                 radius = radius,
@@ -371,10 +349,7 @@ fun CircularProgressBar(
             )
         }
         Text(
-            text = "$hr:$min:$sec",
-            color = Black,
-            fontSize = 35.sp,
-            fontWeight = SemiBold
+            text = "$hr:$min:$sec", color = Black, fontSize = 35.sp, fontWeight = SemiBold
         )
     }
 }
@@ -392,8 +367,7 @@ private fun SetTime(context: Context, mainViewModel: MainViewModel) {
                 mainViewModel.setTime(hr = hr.toInt(), min = min.toInt(), sec = sec.toInt())
                 mainViewModel.showGrantOverlayDialog.value = false
             } else if (mainViewModel.checkTime(hr = hr, min = min, sec = sec) == 1) {
-                Toast.makeText(context, "Please enter time", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "Please enter time", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Please enter time less than 2 hrs", Toast.LENGTH_SHORT)
                     .show()
@@ -401,102 +375,108 @@ private fun SetTime(context: Context, mainViewModel: MainViewModel) {
         }) {
             Text("Save")
         }
-    },
-        dismissButton = {
-            Button(onClick = {
-                mainViewModel.showGrantOverlayDialog.value = false
-            }) {
-                Text("Cancel")
-            }
-        },
-        title = {
-            Text("Set Timer", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        }, text = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(10.dp),
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    value = hr,
-                    singleLine = true,
-                    onValueChange = {
-                        if (it.isEmpty()) {
-                            hr = it
-                        } else if (it.isNotEmpty() && mainViewModel.checkHr(it.toInt())) {
-                            hr = it
-                        }
-                    },
-                    textStyle = TextStyle(color = Black, fontSize = 20.sp),
-                    label = { Text("hr") },
-                    placeholder = { Text(text = "hh") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = White,
-                        focusedLabelColor = Black,
-                        unfocusedLabelColor = Black,
-                        cursorColor = Black,
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = Black
-                    )
+    }, dismissButton = {
+        Button(onClick = {
+            mainViewModel.showGrantOverlayDialog.value = false
+        }) {
+            Text("Cancel")
+        }
+    }, title = {
+        Text("Set Timer", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    }, text = {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(10.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                value = hr,
+                singleLine = true,
+                onValueChange = {
+                    if (it.isEmpty()) {
+                        hr = it
+                    } else if (it.isNotEmpty() && mainViewModel.checkHr(it.toInt())) {
+                        hr = it
+                    }
+                },
+                textStyle = TextStyle(color = Black, fontSize = 20.sp),
+                label = { Text("hr") },
+                placeholder = { Text(text = "hh") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = White,
+                    focusedLabelColor = Black,
+                    unfocusedLabelColor = Black,
+                    cursorColor = Black,
+                    focusedBorderColor = Black,
+                    unfocusedBorderColor = Black
                 )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(10.dp),
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    value = min,
-                    singleLine = true,
-                    onValueChange = {
-                        if (it.isEmpty()) {
-                            min = it
-                        } else if (it.isNotEmpty() && mainViewModel.checkMin(it.toInt())) {
-                            min = it
-                        }
-                    },
-                    textStyle = TextStyle(color = Black, fontSize = 20.sp),
-                    label = { Text("min") },
-                    placeholder = { Text(text = "mm") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = White,
-                        focusedLabelColor = Black,
-                        unfocusedLabelColor = Black,
-                        cursorColor = Black,
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = Black
-                    )
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(10.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                value = min,
+                singleLine = true,
+                onValueChange = {
+                    if (it.isEmpty()) {
+                        min = it
+                    } else if (it.isNotEmpty() && mainViewModel.checkMin(it.toInt())) {
+                        min = it
+                    }
+                },
+                textStyle = TextStyle(color = Black, fontSize = 20.sp),
+                label = { Text("min") },
+                placeholder = { Text(text = "mm") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = White,
+                    focusedLabelColor = Black,
+                    unfocusedLabelColor = Black,
+                    cursorColor = Black,
+                    focusedBorderColor = Black,
+                    unfocusedBorderColor = Black
                 )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(10.dp),
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    value = sec,
-                    singleLine = true,
-                    onValueChange = {
-                        if (it.isEmpty()) {
-                            sec = it
-                        } else if (it.isNotEmpty() && mainViewModel.checkSec(it.toInt())) {
-                            sec = it
-                        }
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(10.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                value = sec,
+                singleLine = true,
+                onValueChange = {
+                    if (it.isEmpty()) {
+                        sec = it
+                    } else if (it.isNotEmpty() && mainViewModel.checkSec(it.toInt())) {
+                        sec = it
+                    }
 
-                    },
-                    textStyle = TextStyle(color = Black, fontSize = 20.sp),
-                    label = { Text("sec") },
-                    placeholder = { Text(text = "ss") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = White,
-                        focusedLabelColor = Black,
-                        unfocusedLabelColor = Black,
-                        cursorColor = Black,
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = Black
-                    )
+                },
+                textStyle = TextStyle(color = Black, fontSize = 20.sp),
+                label = { Text("sec") },
+                placeholder = { Text(text = "ss") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = White,
+                    focusedLabelColor = Black,
+                    unfocusedLabelColor = Black,
+                    cursorColor = Black,
+                    focusedBorderColor = Black,
+                    unfocusedBorderColor = Black
                 )
-            }
-        })
+            )
+        }
+    })
+}
+
+fun handleButtonClick(mainViewModel: MainViewModel, navController: NavHostController, mSelectedText: String) {
+    if (mainViewModel.buttonText.value.equals("New Goal",true)) {
+        mainViewModel.exit()
+        navController.navigate(Screen.MainScreen.route)
+    } else {
+        mainViewModel.changeSecondText()
+        mainViewModel.changeThirdText(mSelectedText)
+        mainViewModel.setTimer()
+    }
 }

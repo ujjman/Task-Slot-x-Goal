@@ -48,11 +48,9 @@ class MainViewModel : ViewModel() {
     val buttonText: MutableLiveData<String> = _buttonText
 
 
-
-
-    private var twentyFivePercentOfTotalTime : Int = 0
-    private var fiftyPercentOfTotalTime : Int = 0
-    private var seventyFivePercentOfTotalTime : Int = 0
+    private var twentyFivePercentOfTotalTime: Int = 0
+    private var fiftyPercentOfTotalTime: Int = 0
+    private var seventyFivePercentOfTotalTime: Int = 0
 
 
     private var countDownTimer: CountDownTimer? = null
@@ -69,101 +67,96 @@ class MainViewModel : ViewModel() {
         return sec <= 59
     }
 
-    fun checkTime(hr: String, min: String, sec: String): Int
-    {
-        if(hr.isEmpty() || min.isEmpty() || sec.isEmpty())
-        {
+    fun checkTime(hr: String, min: String, sec: String): Int {
+        if (hr.isEmpty() || min.isEmpty() || sec.isEmpty()) {
             return 1
         }
         val totSec = (hr.toInt() * 3600) + (min.toInt() * 60) + (sec.toInt())
-        return if(totSec<=7200)
-            2
-        else
-            3
+        return if (totSec <= 7200) 2
+        else 3
     }
-    fun setTime(hr: Int, min: Int, sec: Int)
-    {
+
+    fun setTime(hr: Int, min: Int, sec: Int) {
         val totSec = (hr * 3600) + (min * 60) + (sec)
-        remainingHour.value=hr
+        remainingHour.value = hr
         remainingMin.value = min
-        remainingSec.value =sec
+        remainingSec.value = sec
         time.value = totSec
         twentyFivePercentOfTotalTime = time.value!!.toInt() - (0.25 * time.value!!).toInt()
         fiftyPercentOfTotalTime = time.value!!.toInt() - (0.50 * time.value!!).toInt()
         seventyFivePercentOfTotalTime = time.value!!.toInt() - (0.75 * time.value!!).toInt()
-        maxProgress.value=totSec*1f
-        progressValue.value=totSec*1f
+        maxProgress.value = totSec * 1f
+        progressValue.value = totSec * 1f
     }
 
     fun changeFirstText(subject: String) {
-        firstText.value =
-            "You'll be studying ${subject.substring(6)} for "
-        firstTextContinued.value = " ${remainingHour.value} hr ${remainingMin.value} min ${remainingSec.value} sec"
+        firstText.value = "You'll be studying ${subject.substring(6)} for "
+        firstTextContinued.value =
+            " ${remainingHour.value} hr ${remainingMin.value} min ${remainingSec.value} sec"
     }
-    fun changeSecondText()
-    {
+
+    fun changeSecondText() {
         secondText.value = "Goal"
     }
 
-    fun changeThirdText(subject: String)
-    {
-        thirdText.value = "$subject for ${remainingHour.value} hr ${remainingMin.value} min ${remainingSec.value} sec"
+    fun changeThirdText(subject: String) {
+        thirdText.value =
+            "$subject for ${remainingHour.value} hr ${remainingMin.value} min ${remainingSec.value} sec"
     }
 
-    fun setTimer()
-    {
+    fun setTimer() {
 
-        if(buttonText.value.equals("End",true))
-        {
+        if (buttonText.value.equals("End", true)) {
             countDownTimer?.cancel()
-            time.value=0
+            time.value = 0
             buttonColor.value = EnabledButton
             buttonText.value = "New Goal"
-            progressValue.value=0f
-            remainingTime.value=0
-            remainingSec.value=0
-            remainingMin.value=0
-            remainingHour.value=0
+            progressValue.value = 0f
+            remainingTime.value = 0
+            remainingSec.value = 0
+            remainingMin.value = 0
+            remainingHour.value = 0
             firstText.value = "Timer was cancelled in between."
-            firstTextContinued.value=""
+            firstTextContinued.value = ""
             return
         }
 
-        remainingTime.value=time.value
+        remainingTime.value = time.value
         buttonColor.value = RedButton
         buttonText.value = "End"
         countDownTimer = object : CountDownTimer((time.value!!) * 1000L, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
-                remainingTime.value = remainingTime.value!! -1
+                remainingTime.value = remainingTime.value!! - 1
                 remainingHour.value = remainingTime.value!! / 3600
                 remainingMin.value = (remainingTime.value!! / 60) - (remainingHour.value!! * 60)
-                if (remainingSec.value!! - 1 == -1 && remainingMin.value!! > 0) remainingSec.value = 59
+                if (remainingSec.value!! - 1 == -1 && remainingMin.value!! > 0) remainingSec.value =
+                    59
                 else remainingSec.value = remainingSec.value!! - 1
                 progressValue.value = progressValue.value?.minus(1f)
                 when (remainingTime.value) {
                     twentyFivePercentOfTotalTime -> {
                         firstText.value = "Great going! You've completed 25% of your goal."
-                        firstTextContinued.value=""
+                        firstTextContinued.value = ""
                     }
                     fiftyPercentOfTotalTime -> {
                         firstText.value = "Great going! You've completed 50% of your goal."
-                        firstTextContinued.value=""
+                        firstTextContinued.value = ""
                     }
                     seventyFivePercentOfTotalTime -> {
                         firstText.value = "Great going! You've completed 75% of your goal."
-                        firstTextContinued.value=""
+                        firstTextContinued.value = ""
                     }
                 }
             }
 
 
             override fun onFinish() {
-                time.value=0
+                time.value = 0
                 firstText.value = "Well done! You've achieved your goal."
                 buttonColor.value = EnabledButton
                 buttonText.value = "New Goal"
-                isCompleted.value=true
+                isCompleted.value = true
             }
         }.start()
     }
@@ -171,4 +164,39 @@ class MainViewModel : ViewModel() {
 
 
 
+    fun exit() {
+        countDownTimer?.cancel()
+
+        time.value = 0
+        remainingTime.value = 0
+
+
+        remainingHour.value = 0
+        remainingMin.value = 0
+        remainingSec.value = 0
+
+        isCompleted.value = false
+        showGrantOverlayDialog.value = false
+        tagSelected.value = false
+
+        firstText.value = ""
+        firstTextContinued.value = ""
+        secondText.value = ""
+        thirdText.value = ""
+
+        maxProgress.value = 100f
+        progressValue.value = 100f
+
+        buttonColor.value = EnabledButton
+        buttonText.value = "Start"
+
+
+        twentyFivePercentOfTotalTime = 0
+        fiftyPercentOfTotalTime = 0
+        seventyFivePercentOfTotalTime = 0
+
+
+        countDownTimer = null
+
+    }
 }
