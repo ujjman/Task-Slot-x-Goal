@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -141,12 +142,15 @@ class MainViewModel : ViewModel() {
         countDownTimer = object : CountDownTimer((time.value!!) * 1000L, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
-                remainingTime.value = remainingTime.value!! - 1
                 remainingHour.value = remainingTime.value!! / 3600
                 remainingMin.value = (remainingTime.value!! / 60) - (remainingHour.value!! * 60)
-                if (remainingSec.value!! - 1 == -1 && remainingMin.value!! > 0) remainingSec.value =
-                    59
+                Log.d("ujjman","${remainingHour.value}  ${remainingMin.value}  ${remainingSec.value}  ${remainingTime.value}")
+                if (remainingSec.value!! == 0 && remainingMin.value!! > 0) {
+                    remainingSec.value = 59
+                    remainingMin.value = remainingMin.value!! -1
+                }
                 else remainingSec.value = remainingSec.value!! - 1
+                remainingTime.value = remainingTime.value!! - 1
                 progressValue.value = progressValue.value?.minus(1f)
                 when (remainingTime.value) {
                     twentyFivePercentOfTotalTime -> {
