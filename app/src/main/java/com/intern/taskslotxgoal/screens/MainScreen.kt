@@ -113,11 +113,12 @@ fun MainScreen(
         buttonText = it
     }
 
+    mainViewModel.createMediaPlayer(navController.context)
     val icon = if (mExpanded) Icons.Filled.KeyboardArrowUp
     else Icons.Filled.KeyboardArrowDown
     when (showTimerDialog) {
         true -> {
-            SetTime(context = navController.context, mainViewModel = mainViewModel)
+            SetTime(context = navController.context, mainViewModel = mainViewModel, selectedText = mSelectedText)
         }
         else -> {}
     }
@@ -223,7 +224,7 @@ fun MainScreen(
                     }
                     when (mainViewModel.showGrantOverlayDialog.value) {
                         true -> {
-                            SetTime(context = navController.context, mainViewModel = mainViewModel)
+                            SetTime(context = navController.context, mainViewModel = mainViewModel, selectedText = mSelectedText)
                         }
                         else -> {}
                     }
@@ -319,6 +320,10 @@ fun CircularProgressBar(
         .clickable(
             interactionSource = interactionSource, indication = null
         ) {
+            if(mainViewModel.buttonText.value?.equals("End",true)!! || mainViewModel.buttonText.value?.equals("New Goal",true)!!)
+            {
+                return@clickable
+            }
             mainViewModel.showGrantOverlayDialog.value = true
         }) {
         var radius by remember {
@@ -355,7 +360,7 @@ fun CircularProgressBar(
 }
 
 @Composable
-private fun SetTime(context: Context, mainViewModel: MainViewModel) {
+private fun SetTime(context: Context, mainViewModel: MainViewModel, selectedText: String) {
     var hr by remember { mutableStateOf("") }
     var min by remember { mutableStateOf("") }
     var sec by remember { mutableStateOf("") }
@@ -366,8 +371,9 @@ private fun SetTime(context: Context, mainViewModel: MainViewModel) {
             if (mainViewModel.checkTime(hr = hr, min = min, sec = sec) == 2) {
                 mainViewModel.setTime(hr = hr.toInt(), min = min.toInt(), sec = sec.toInt())
                 mainViewModel.showGrantOverlayDialog.value = false
+                mainViewModel.changeFirstText(selectedText)
             } else if (mainViewModel.checkTime(hr = hr, min = min, sec = sec) == 1) {
-                Toast.makeText(context, "Please enter time", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Please enter data in all fields", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Please enter time less than 2 hrs", Toast.LENGTH_SHORT)
                     .show()
@@ -477,6 +483,10 @@ fun handleButtonClick(mainViewModel: MainViewModel, navController: NavHostContro
     } else {
         mainViewModel.changeSecondText()
         mainViewModel.changeThirdText(mSelectedText)
-        mainViewModel.setTimer()
+        mainViewModel.setTimer(navController.context)
     }
 }
+
+
+
+

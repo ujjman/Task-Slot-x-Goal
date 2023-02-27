@@ -1,9 +1,22 @@
 package com.intern.taskslotxgoal.viewmodels
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.media.MediaPlayer
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Build
 import android.os.CountDownTimer
 import androidx.compose.ui.graphics.Color
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.intern.taskslotxgoal.MainActivity
+import com.intern.taskslotxgoal.R
 import com.intern.taskslotxgoal.ui.theme.EnabledButton
 import com.intern.taskslotxgoal.ui.theme.RedButton
 
@@ -54,6 +67,7 @@ class MainViewModel : ViewModel() {
 
 
     private var countDownTimer: CountDownTimer? = null
+    private var player: MediaPlayer = MediaPlayer()
 
     fun checkHr(hr: Int): Boolean {
         return hr <= 99
@@ -104,7 +118,7 @@ class MainViewModel : ViewModel() {
             "$subject for ${remainingHour.value} hr ${remainingMin.value} min ${remainingSec.value} sec"
     }
 
-    fun setTimer() {
+    fun setTimer(context: Context) {
 
         if (buttonText.value.equals("End", true)) {
             countDownTimer?.cancel()
@@ -118,9 +132,9 @@ class MainViewModel : ViewModel() {
             remainingHour.value = 0
             firstText.value = "Timer was cancelled in between."
             firstTextContinued.value = ""
+            cancelNotification(context,1398)
             return
         }
-
         remainingTime.value = time.value
         buttonColor.value = RedButton
         buttonText.value = "End"
@@ -152,6 +166,8 @@ class MainViewModel : ViewModel() {
 
 
             override fun onFinish() {
+                createNotificationChannel(context)
+                player.start()
                 time.value = 0
                 firstText.value = "Well done! You've achieved your goal."
                 buttonColor.value = EnabledButton
@@ -161,10 +177,50 @@ class MainViewModel : ViewModel() {
         }.start()
     }
 
+    private fun createNotificationChannel(context: Context) {
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Task App"
+            val descriptionText = "Timer ended"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("TASK_ENDED_NOTIFICATION", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
+        val builder =
+            NotificationCompat.Builder(context, "TASK_ENDED_NOTIFICATION").setSmallIcon(R.drawable.ic_alarm)
+                .setContentTitle("Timer ended")
+                .setPriority(NotificationCompat.PRIORITY_HIGH).setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+        with(NotificationManagerCompat.from(context)) {
+            notify(1398, builder.build())
+        }
+    }
+
+    private fun cancelNotification(ctx: Context, notifyId: Int) {
+        val ns = Context.NOTIFICATION_SERVICE
+        val nMgr = ctx.getSystemService(ns) as NotificationManager
+        nMgr.cancel(notifyId)
+    }
+
+    fun createMediaPlayer(context: Context)
+    {
+        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        player = MediaPlayer.create(context, alarmSound)
+        player.isLooping = true
+    }
 
     fun exit() {
+        player.pause()
         countDownTimer?.cancel()
 
         time.value = 0
@@ -197,6 +253,7 @@ class MainViewModel : ViewModel() {
 
 
         countDownTimer = null
+        player=MediaPlayer()
 
     }
 }
