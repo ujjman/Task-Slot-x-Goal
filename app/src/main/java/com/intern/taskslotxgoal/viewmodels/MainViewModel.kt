@@ -1,7 +1,6 @@
 package com.intern.taskslotxgoal.viewmodels
 
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -113,10 +112,28 @@ class MainViewModel : ViewModel() {
 
     fun setTimer()
     {
+
+        if(buttonText.value.equals("End",true))
+        {
+            countDownTimer?.cancel()
+            time.value=0
+            buttonColor.value = EnabledButton
+            buttonText.value = "New Goal"
+            progressValue.value=0f
+            remainingTime.value=0
+            remainingSec.value=0
+            remainingMin.value=0
+            remainingHour.value=0
+            firstText.value = "Timer was cancelled in between."
+            firstTextContinued.value=""
+            return
+        }
+
         remainingTime.value=time.value
         buttonColor.value = RedButton
         buttonText.value = "End"
         countDownTimer = object : CountDownTimer((time.value!!) * 1000L, 1000) {
+
             override fun onTick(millisUntilFinished: Long) {
                 remainingTime.value = remainingTime.value!! -1
                 remainingHour.value = remainingTime.value!! / 3600
@@ -124,7 +141,6 @@ class MainViewModel : ViewModel() {
                 if (remainingSec.value!! - 1 == -1 && remainingMin.value!! > 0) remainingSec.value = 59
                 else remainingSec.value = remainingSec.value!! - 1
                 progressValue.value = progressValue.value?.minus(1f)
-                Log.d("ujjman","prog ${progressValue.value}")
                 when (remainingTime.value) {
                     twentyFivePercentOfTotalTime -> {
                         firstText.value = "Great going! You've completed 25% of your goal."
@@ -140,6 +156,7 @@ class MainViewModel : ViewModel() {
                     }
                 }
             }
+
 
             override fun onFinish() {
                 time.value=0
