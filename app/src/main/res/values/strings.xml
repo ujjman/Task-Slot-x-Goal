@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Task Slot x Goal</string>
+    <string name="tap_circle">Tap on the circle above to set your time.</string>
+    <string name="tag_select">Select a tag for your time slot:</string>
+    <string name="study">You\'ll be studying</string>
+    <string name="great_going_25">Great going! You\'ve completed 25% of your goal.</string>
+    <string name="great_going_50">Great going! You\'ve completed 50% of your goal.</string>
+    <string name="great_going_75">Great going! You\'ve completed 75% of your goal.</string>
+    <string name="well_done">Well done! You\'ve achieved your goal.</string>
+    <string name="select_text">Select tag</string>
+</resources>
