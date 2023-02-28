@@ -10,7 +10,7 @@
 ## Installation
 
 1. **Clone the Project:**
-    1. Run ` git clone https://github.com/ujjman/Task-Slot-x-Goal/tree/master ` in terminal
+    1. Run ` git clone https://github.com/ujjman/Task-Slot-x-Goal ` in terminal
     1. Android Studio -> File -> Open
     
 ## Libraries
