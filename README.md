@@ -20,6 +20,9 @@
     - [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) - Store and manage UI-related data in a lifecycle conscious way
     - [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) - Observable data holder class
     
+    ## Link to download the app
+    https://drive.google.com/file/d/1aeYWzdB7qiMVCKV4J4LsyacnJddTVu-y/view?usp=sharing
+    
     ## Screenshots of the App
     
     ![photo_2023-02-28_05-30-49](https://user-images.githubusercontent.com/49057926/221717435-d4166f8b-086e-4c78-8528-114a44c31797.jpg)
